@@ -15,6 +15,7 @@ export class AccountService {
 
   constructor(private http: HttpClient) { }
 
+  // tslint:disable-next-line: typedef
   login(model: any){
     return this.http.post(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
