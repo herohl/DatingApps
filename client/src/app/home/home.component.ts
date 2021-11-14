@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-home',
@@ -14,11 +14,14 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  registerToggle(){
+  // tslint:disable-next-line: typedef
+  registerToggle() {
     this.registerMode = !this.registerMode;
   }
 
-  cancelRegisterMode(event: boolean){
+  // tslint:disable-next-line: typedef
+  cancelRegisterMode(event: boolean) {
     this.registerMode = event;
   }
+
 }

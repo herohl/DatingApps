@@ -14,7 +14,7 @@ namespace DatingApps.Api.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.8");
+                .HasAnnotation("ProductVersion", "5.0.11");
 
             modelBuilder.Entity("DatingApps.Api.Entities.AppUser", b =>
                 {
@@ -38,6 +38,9 @@ namespace DatingApps.Api.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Interests")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Introduction")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("KnownAs")
@@ -69,7 +72,7 @@ namespace DatingApps.Api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AppUserId")
+                    b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsMain")
@@ -90,9 +93,13 @@ namespace DatingApps.Api.Data.Migrations
 
             modelBuilder.Entity("DatingApps.Api.Entities.Photo", b =>
                 {
-                    b.HasOne("DatingApps.Api.Entities.AppUser", null)
+                    b.HasOne("DatingApps.Api.Entities.AppUser", "AppUser")
                         .WithMany("Photos")
-                        .HasForeignKey("AppUserId");
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("DatingApps.Api.Entities.AppUser", b =>

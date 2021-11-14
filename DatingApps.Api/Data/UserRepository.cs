@@ -54,9 +54,11 @@ namespace DatingApps.Api.Data
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
-        public Task<AppUser> GetUserByUsernameAsync(string username)
+        public async Task<AppUser> GetUserByUsernameAsync(string username)
         {
-            throw new NotImplementedException();
+            return await this.context.Users
+                .Include(p => p.Photos)
+                .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
         public async Task<IEnumerable<AppUser>> GetUsersAsync()

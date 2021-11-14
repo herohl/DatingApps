@@ -21,12 +21,14 @@ export class MemberDetailComponent implements OnInit {
 
     this.galleryOptions = [
       {
-          width: '600px',
-          height: '400px',
-          thumbnailsColumns: 4,
-          imageAnimation: NgxGalleryAnimation.Slide,
-          preview: false
-      }];
+        width: '500px',
+        height: '500px',
+        imagePercent: 100,
+        thumbnailsColumns: 4,
+        imageAnimation: NgxGalleryAnimation.Slide,
+        preview: false
+      }
+    ];
   }
 
   getImages(): NgxGalleryImage[]{
@@ -43,7 +45,8 @@ export class MemberDetailComponent implements OnInit {
 
   // tslint:disable-next-line: typedef
   loadMember(){
-    this.memberService.getMember(this.route.snapshot.paramMap.get('username')).subscribe(member => {
+    // tslint:disable-next-line: no-non-null-assertion
+    this.memberService.getMember(this.route.snapshot.paramMap.get('username')!).subscribe(member => {
       this.member = member;
       this.galleryImages = this.getImages();
     });

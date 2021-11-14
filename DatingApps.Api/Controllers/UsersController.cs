@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using DatingApps.Api.Interfaces;
 using DatingApps.Api.DTOs;
 using AutoMapper;
+using System.Security.Claims;
 
 namespace DatingApps.Api.Controllers
 {
@@ -43,6 +44,19 @@ namespace DatingApps.Api.Controllers
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
             return await this.userRepository.GetMemberAsync(username);
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
+        {
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await this.userRepository.GetUserByUsernameAsync(username);
+
+            this.mapper.Map(memberUpdateDto, user);
+            this.userRepository.Update(user);
+
+            if(await this.userRepository.SaveAllAsync()) return NoContent();
+            return BadRequest("gagal update usernya");
         }
     }
 }
