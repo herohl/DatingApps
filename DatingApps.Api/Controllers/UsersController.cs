@@ -6,6 +6,10 @@ using DatingApps.Api.Interfaces;
 using DatingApps.Api.DTOs;
 using AutoMapper;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using DatingApps.Api.Extensions;
+using DatingApps.Api.Entities;
+using System.Linq;
 
 namespace DatingApps.Api.Controllers
 {
@@ -14,11 +18,13 @@ namespace DatingApps.Api.Controllers
     {
         private readonly IUserRepository userRepository;
         private readonly IMapper mapper;
+        private readonly IPhotoService photoService;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper)
+        public UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService)
         {
             this.userRepository = userRepository;
             this.mapper = mapper;
+            this.photoService = photoService;
         }
 
         [HttpGet]
@@ -32,15 +38,7 @@ namespace DatingApps.Api.Controllers
             return Ok(users);
         }
 
-        //[HttpGet("{username}")]
-        //public async Task<ActionResult<MemberDto>> GetUser(string username)
-        //{
-        //    //var user = await this.userRepository.GetUserByUsername(username);
-        //    //return this.mapper.Map<MemberDto>(user);
-        //    return await this.userRepository.GetMemberAsync(username);
-        //}
-
-        [HttpGet("{username}")]
+        [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
             return await this.userRepository.GetMemberAsync(username);
@@ -49,14 +47,59 @@ namespace DatingApps.Api.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
         {
-            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = await this.userRepository.GetUserByUsernameAsync(username);
+            var user = await this.userRepository.GetUserByUsernameAsync(User.GetUserName());
 
             this.mapper.Map(memberUpdateDto, user);
             this.userRepository.Update(user);
 
             if(await this.userRepository.SaveAllAsync()) return NoContent();
             return BadRequest("gagal update usernya");
+        }
+
+        [HttpPost("add-photo")]
+        public async Task<ActionResult<PhotoDto>> AddPhoto (IFormFile file)
+        {
+            var user = await this.userRepository.GetUserByUsernameAsync(User.GetUserName());
+            var result = await this.photoService.AddPhotoAsync(file);
+
+            if(result.Error != null) return BadRequest(result.Error.Message);
+
+            var photo = new Photo
+            {
+                Url = result.SecureUrl.AbsoluteUri,
+                PublicId = result.PublicId
+            };
+
+            if(user.Photos.Count == 0)
+            {
+                photo.IsMain = true;
+            }
+
+            user.Photos.Add(photo);
+
+            if(await this.userRepository.SaveAllAsync())
+            {
+                // return mapper.Map<PhotoDto>(photo);
+                return CreatedAtRoute("GetUser",new {username = user.UserName}, mapper.Map<PhotoDto>(photo));
+            }
+
+            return BadRequest("masalah dipenambahan photo");
+        }
+
+        [HttpPut("set-main-photo/{photoId}")]
+        public async Task<ActionResult> SetMainPhoto(int photoId)
+        {
+            var user = await this.userRepository.GetUserByUsernameAsync(User.GetUserName());
+            var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
+
+            if (photo.IsMain) return BadRequest("photo ini udah jadi photo utama km");
+
+            var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
+            if(currentMain != null) currentMain.IsMain = false;
+            photo.IsMain = true;
+
+            if (await this.userRepository.SaveAllAsync()) return NoContent();
+            return BadRequest("gagal jadiin photo utama");
         }
     }
 }
