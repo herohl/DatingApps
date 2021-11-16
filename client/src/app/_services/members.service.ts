@@ -42,4 +42,14 @@ export class MembersService {
     );
   }
 
+  // tslint:disable-next-line: typedef
+  setMainPhoto(photoId: number){
+    return this.http.put(this.baseUrl + 'users/set-main-photo/' + photoId, {});
+  }
+
+  // tslint:disable-next-line: typedef
+  deletePhoto(photoId: number){
+    return this.http.delete(this.baseUrl + 'users/delete-photo/' + photoId);
+  }
+
 }
