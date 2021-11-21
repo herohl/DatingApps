@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using DatingApps.Api.DTOs;
 using DatingApps.Api.Entities;
+using DatingApps.Api.Helpers;
 using DatingApps.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -30,11 +31,13 @@ namespace DatingApps.Api.Data
                 .SingleOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<MemberDto>> GetMembersAsync()
+        public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
         {
-            return await this.context.Users
+            var query = this.context.Users
                 .ProjectTo<MemberDto>(this.mapper.ConfigurationProvider)
-                .ToListAsync();
+                .AsNoTracking();
+            
+            return await PagedList<MemberDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
 
         public Task<IEnumerable<AppUser>> GetUserAsync()

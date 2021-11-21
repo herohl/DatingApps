@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using DatingApps.Api.Extensions;
 using DatingApps.Api.Entities;
 using System.Linq;
+using DatingApps.Api.Helpers;
 
 namespace DatingApps.Api.Controllers
 {
@@ -28,12 +29,14 @@ namespace DatingApps.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
         {
             //var users = await this.userRepository.GetUsersAsync();
             //var usersToReturn = this.mapper.Map<IEnumerable<MemberDto>>(users);
 
-            var users = await this.userRepository.GetMembersAsync();
+            var users = await this.userRepository.GetMembersAsync(userParams);
+
+            Response.AddPaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages);
 
             return Ok(users);
         }
