@@ -19,7 +19,7 @@ export class MembersService {
   user: User;
   userParams: UserParams;
 
-  constructor(private http: HttpClient, private accountService: AccountService) { 
+  constructor(private http: HttpClient, private accountService: AccountService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
       this.userParams = new UserParams(user);
@@ -92,6 +92,16 @@ export class MembersService {
   // tslint:disable-next-line: typedef
   deletePhoto(photoId: number){
     return this.http.delete(this.baseUrl + 'users/delete-photo/' + photoId);
+  }
+
+  // tslint:disable-next-line:typedef
+  addLike(username: string){
+    return this.http.post(this.baseUrl + 'likes/' + username,{});
+  }
+
+  // tslint:disable-next-line:typedef
+  getLikes(predicate: string){
+    return this.http.get<Partial<Member[]>>(this.baseUrl + 'likes?predicate=' + predicate);
   }
 
   // tslint:disable-next-line: typedef
