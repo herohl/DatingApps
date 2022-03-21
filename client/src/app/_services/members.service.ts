@@ -46,7 +46,7 @@ export class MembersService {
     // idea to create a key
     // console.log(Object.values(userParams).join('-'));
 
-    var response = this.memberCache.get(Object.values(userParams).join('-'));
+    const response = this.memberCache.get(Object.values(userParams).join('-'));
     if (response) {
       return of(response);
     }
@@ -59,6 +59,7 @@ export class MembersService {
     params = params.append('orderBy', userParams.orderBy);
 
     return this.getPaginatedResult<Member[]>(this.baseUrl + 'users', params)
+      // tslint:disable-next-line:no-shadowed-variable
     .pipe(map(response => {
       this.memberCache.set(Object.values(userParams).join('-'), response);
       return response;
@@ -69,6 +70,7 @@ export class MembersService {
   getMember(username: string){
     const member = [...this.memberCache.values()]
       .reduce((arr, elem) => arr.concat(elem.result), [])
+      // tslint:disable-next-line:no-shadowed-variable
       .find((member: Member) => member.username === username);
     if (member !== undefined) { return of(member); }
     return this.http.get<Member>(this.baseUrl + 'users/' + username);
@@ -96,16 +98,18 @@ export class MembersService {
 
   // tslint:disable-next-line:typedef
   addLike(username: string){
-    return this.http.post(this.baseUrl + 'likes/' + username,{});
+    return this.http.post(this.baseUrl + 'likes/' + username, {});
   }
 
   // tslint:disable-next-line:typedef
-  getLikes(predicate: string){
-    return this.http.get<Partial<Member[]>>(this.baseUrl + 'likes?predicate=' + predicate);
+  getLikes(predicate: string, pageNumber, pageSize){
+    let params = this.getPaginationHeaders(pageNumber, pageSize);
+    params = params.append('predicate', predicate);
+    return this.getPaginatedResult(this.baseUrl + 'likes', params);
   }
 
   // tslint:disable-next-line: typedef
-  private getPaginatedResult<T>(url, params) {
+  private getPaginatedResult<T>(url: string, params: HttpParams) {
     const paginatedResult: PaginatedResult<T> = new PaginatedResult<T>();
 
     return this.http.get<T>(url, { observe: 'response', params }).pipe(

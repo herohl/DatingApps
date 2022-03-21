@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {Member} from '../_models/member';
-import {MembersService} from '../_services/members.service';
+import { Member } from '../_models/member';
+import { Pagination } from '../_models/pagination';
+import { MembersService } from '../_services/members.service';
 
 @Component({
   selector: 'app-lists',
@@ -8,8 +9,11 @@ import {MembersService} from '../_services/members.service';
   styleUrls: ['./lists.component.css']
 })
 export class ListsComponent implements OnInit {
-  members: Partial<Member[]>;
+  members: Partial<Member>;
   predicate = 'liked';
+  pageNumber = 1;
+  pageSize = 2;
+  pagination: Pagination;
 
   constructor(private memberService: MembersService) { }
 
@@ -19,8 +23,15 @@ export class ListsComponent implements OnInit {
 
   // tslint:disable-next-line:typedef
   loadLikes() {
-    this.memberService.getLikes(this.predicate).subscribe(response => {
-      this.members = response;
+    this.memberService.getLikes(this.predicate, this.pageNumber, this.pageSize).subscribe(response => {
+      this.members = response.result;
+      this.pagination = response.pagination;
     });
+  }
+
+  // tslint:disable-next-line:typedef
+  pagedChanged(event: any) {
+    this.pageNumber = event.page;
+    this.loadLikes();
   }
 }
