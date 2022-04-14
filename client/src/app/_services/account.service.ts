@@ -40,6 +40,9 @@ export class AccountService {
 
   // tslint:disable-next-line: typedef
   setCurrentUser(user: User){
+    user.roles = [];
+    const roles = this.getDecodedToken(user.token).role;
+    Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUserSource.next(user);
   }
@@ -48,5 +51,10 @@ export class AccountService {
   logout(){
     localStorage.removeItem('user');
     this.currentUserSource.next(null);
+  }
+
+  // tslint:disable-next-line:typedef
+  getDecodedToken(token){
+    return JSON.parse(atob(token.split('.')[1]));
   }
 }
