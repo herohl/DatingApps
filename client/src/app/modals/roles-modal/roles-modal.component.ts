@@ -1,19 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit} from '@angular/core';
 import {BsModalRef} from 'ngx-bootstrap/modal';
+import {User} from '../../_models/user';
 
 @Component({
-  selector: 'app-roles-model',
-  templateUrl: './roles-model.component.html',
-  styleUrls: ['./roles-model.component.css']
+  selector: 'app-roles-modal',
+  templateUrl: './roles-modal.component.html',
+  styleUrls: ['./roles-modal.component.css']
 })
-export class RolesModelComponent implements OnInit {
-  title: string;
+export class RolesModalComponent implements OnInit {
+  @Input() updateSelectedRoles = new EventEmitter();
+  user: User;
+  roles: any[];
+  /*title: string;
   list: any[] = [];
-  closeBtnName: string;
+  closeBtnName: string;*/
 
   constructor(public bsModalRef: BsModalRef) { }
 
   ngOnInit(): void {
+    this.updateRoles();
+  }
+
+  // tslint:disable-next-line:typedef
+  updateRoles(){
+    this.updateSelectedRoles.emit(this.roles);
+    this.bsModalRef.hide();
   }
 
 }
